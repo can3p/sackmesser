@@ -123,3 +123,7 @@ Some dream scenarios:
 - `echo { "props": [ { "field": "value1 }, { "field2": "value1 } ] } | sackmesser '.props[].index = index()' -> { "props": [ { "index": 0, "field": "value1 }, { "index": 1, "field2": "value1 } ] }`
 
 Or somethings like this, suggestions welcome!
+
+## License
+
+See the [License](LICENSE)
