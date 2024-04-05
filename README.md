@@ -117,7 +117,8 @@ And in general
 
 Some dream scenarios:
 
-- `echo { "a": 1 } | sackmesser 'inc(.a)' -> { "a", 2 }`
+- `echo { "a": 1 } | sackmesser 'inc(.a)' -> { "a": 2 }`
+- `echo { "a": 1 } | sackmesser 'inc(.a)' '.b = true' -> { "a": 2, "b": true }`
 - `echo { "a": [1,2,3] } | sackmesser '.len = len(.a)' -> { "a": [1,2,3], len: 3 }`
 - `echo { "props": [ { "field": "value1 }, { "field2": "value1 } ] } | sackmesser '.props[].index = index()' -> { "props": [ { "index": 0, "field": "value1 }, { "index": 1, "field2": "value1 } ] }`
 
