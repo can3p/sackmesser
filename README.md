@@ -77,13 +77,13 @@ Download `sackmesser` and install into a local bin directory.
 Latest version:
 
 ```bash
-curl -L https://raw.githubusercontent.com/can3p/sackmesser/main/generated/install.sh | sh
+curl -L https://raw.githubusercontent.com/can3p/sackmesser/master/generated/install.sh | sh
 ```
 
 Specific version:
 
 ```bash
-curl -L https://raw.githubusercontent.com/can3p/sackmesser/main/generated/install.sh | sh -s 0.0.4
+curl -L https://raw.githubusercontent.com/can3p/sackmesser/master/generated/install.sh | sh -s 0.0.4
 ```
 
 The script will install the binary into `$HOME/bin` folder by default, you can override this by setting
