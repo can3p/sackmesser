@@ -15,7 +15,7 @@ Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will t
 ### If you just want to convert json to yaml or back
 
 ```
-$ echo '{ "a":1, "prop": { "b": [1,2,3] } }' | go run . mod --output-format yaml
+$ echo '{ "a":1, "prop": { "b": [1,2,3] } }' | sackmesser mod --output-format yaml
 a: 1
 prop:
     b:
@@ -27,7 +27,7 @@ prop:
 ### Set a field with a value
 
 ```
-$ echo '{ "a":1 }' | go run . mod '.prop' '{ "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod '.prop' '{ "test": 123 }'
 {
   "a": 1,
   "prop": "{ \"test\": 123 }"
@@ -37,7 +37,7 @@ $ echo '{ "a":1 }' | go run . mod '.prop' '{ "test": 123 }'
 ### Set a field with a value that will be parse as a json first
 
 ```
-$ echo '{ "a":1 }' | go run . mod -j '.prop' '{ "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod -j '.prop' '{ "test": 123 }'
 {
     "a": 1,
     "prop": {
@@ -49,7 +49,7 @@ $ echo '{ "a":1 }' | go run . mod -j '.prop' '{ "test": 123 }'
 You can always spit out a different format if you want!
 
 ```
-$ echo '{ "a":1 }' | go run . mod --output-format yaml -j '.prop' '{ "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod --output-format yaml -j '.prop' '{ "test": 123 }'
 a: 1
 prop:
     test: 123
@@ -58,7 +58,7 @@ prop:
 ### Delete a field
 
 ```
-echo '{ "a":1, "deleteme": "please" }' | go run . mod -d '.deleteme'
+echo '{ "a":1, "deleteme": "please" }' | sackmesser mod -d '.deleteme'
 {
   "a": 1
 }
