@@ -101,7 +101,7 @@ func GithubRepo() string {
 }
 
 func ProjectName() string {
-	return ""
+	return "sackmesser"
 }
 
 func Commit() string {

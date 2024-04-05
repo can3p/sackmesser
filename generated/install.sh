@@ -17,15 +17,15 @@ main() {
 		version="v$1"
 	fi
 
-	release_uri="https://github.com/can3p/sackmesser/releases/download/$version/_${os}_${arch}.tar.gz"
+	release_uri="https://github.com/can3p/sackmesser/releases/download/$version/sackmesser_${os}_${arch}.tar.gz"
 	echo "Getting version $version, $release_uri"
 
 	install_path="${CUSTOM_INSTALL:-$HOME}"
 
 	bin_dir="$install_path/bin"
 	ts=$(date +%s)
-	tmp_dir="$install_path/_tmp$ts"
-	exe="$bin_dir/"
+	tmp_dir="$install_path/sackmesser_tmp$ts"
+	exe="$bin_dir/sackmesser"
 
 	mkdir -p "$bin_dir"
 	mkdir -p "$tmp_dir"
@@ -36,17 +36,17 @@ main() {
 	# be a good citizen and clean up after yourself
 	trap cleanup EXIT
 
-	curl -q --fail --location --progress-bar --output "$tmp_dir/.tar.gz" "$release_uri"
+	curl -q --fail --location --progress-bar --output "$tmp_dir/sackmesser.tar.gz" "$release_uri"
 	# extract to tmp dir so we don't open existing executable file for writing:
-	tar -C "$tmp_dir" -xzf "$tmp_dir/.tar.gz"
-	chmod +x "$tmp_dir/"
+	tar -C "$tmp_dir" -xzf "$tmp_dir/sackmesser.tar.gz"
+	chmod +x "$tmp_dir/sackmesser"
 	# atomically rename into place:
-	mv "$tmp_dir/" "$exe"
-	rm "$tmp_dir/.tar.gz"
+	mv "$tmp_dir/sackmesser" "$exe"
+	rm "$tmp_dir/sackmesser.tar.gz"
 
-	echo " was installed successfully to $exe"
-	if command -v  >/dev/null; then
-		echo "Run ' help' to get started"
+	echo "sackmesser was installed successfully to $exe"
+	if command -v sackmesser >/dev/null; then
+		echo "Run 'sackmesser help' to get started"
 	else
 		case $SHELL in
 		/bin/zsh) shell_profile=".zshrc" ;;
