@@ -1,13 +1,10 @@
 package operations
 
 import (
-	"fmt"
-
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 )
 
 func Set(root types.Node, path []string, value any) error {
-	fmt.Println("Set", path, value)
 	if len(path) == 1 {
 		return root.SetField(path[0], value)
 	}

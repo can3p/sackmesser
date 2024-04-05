@@ -1,8 +1,8 @@
-package simplejson
+package simpleyaml
 
 import (
-	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"reflect"
 	"strconv"
 
@@ -15,7 +15,7 @@ type jnode struct {
 }
 
 func (n *jnode) Serialize() ([]byte, error) {
-	return json.MarshalIndent(n.v, "", "  ")
+	return yaml.Marshal(n.v)
 }
 
 // if you get a node, it's your responsibility
@@ -159,11 +159,13 @@ func (n *jnode) NodeType() types.NodeType {
 
 	isNil := fmt.Sprintf("%v", n.vType) == "<nil>"
 	// we do not enumerate all values of kind
-	// since json does not have them
+	// since yaml does not have them
 
 	if isNil {
 		return types.NodeTypeNull
 	}
+
+	fmt.Println(n.vType.Kind())
 
 	switch n.vType.Kind() {
 	case reflect.Bool:
@@ -214,7 +216,7 @@ func (n *jnode) NodeType() types.NodeType {
 func Parse(b []byte) (types.Node, error) {
 	var j any
 
-	if err := json.Unmarshal(b, &j); err != nil {
+	if err := yaml.Unmarshal(b, &j); err != nil {
 		return nil, err
 	}
 
