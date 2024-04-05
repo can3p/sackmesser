@@ -3,7 +3,7 @@
 __Warning: sackmesser is under heavy development, the syntax is a subject to change__
 
 Remember all those times where you had to save json in order to find and update a single field?
-Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will take case of that.
+Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will take care of that.
 
 ## Capabilities
 
