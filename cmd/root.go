@@ -12,8 +12,7 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "sackmesser",
-	Short: "A small additional tool to superpower your cobra cli",
-	Long:  `A small additional tool to superpower your cobra cli`,
+	Short: "json/yaml mutation tool",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
