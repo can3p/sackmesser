@@ -1,6 +1,6 @@
 #  Sackmesser - your cli to modify json/yaml on the fly
 
-__Warning: sackmesser is under heavy development, the syntax is a subject to change__
+__Warning: sackmesser is a prototype at the moment, do not expect the api to be stable
 
 Remember all those times where you had to save json in order to find and update a single field?
 Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will take care of that.
