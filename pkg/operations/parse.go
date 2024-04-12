@@ -74,8 +74,6 @@ func (j *JSON) Parse(lex *lexer.PeekingLexer) error {
 
 	var val any
 
-	fmt.Println(buf.String())
-
 	for {
 		peeked := lex.Next()
 
