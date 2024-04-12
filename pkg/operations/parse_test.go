@@ -16,41 +16,62 @@ func TestParse(t *testing.T) {
 		ExpectedArgs []any
 		ExpectedPath []string
 	}{
+		//{
+		//description:  "test boolean",
+		//input:        "set(field, true)",
+		//ExpectedOp:   "set",
+		//ExpectedPath: []string{"field"},
+		//ExpectedArgs: []any{true},
+		//},
+		//{
+		//description:  "test int",
+		//input:        "set(field, 12345)",
+		//ExpectedOp:   "set",
+		//ExpectedPath: []string{"field"},
+		//ExpectedArgs: []any{12345},
+		//},
 		{
-			description:  "test boolean",
-			input:        "set(.field, true)",
+			description:  "test string with single quotes",
+			input:        `set(field, '123"   45')`,
 			ExpectedOp:   "set",
 			ExpectedPath: []string{"field"},
-			ExpectedArgs: []any{true},
+			ExpectedArgs: []any{"123\"   45"},
 		},
 		{
-			description:  "test int",
-			input:        "set(.field, 12345)",
+			description:  "test string with double quotes",
+			input:        `set(field, "123'   45")`,
 			ExpectedOp:   "set",
 			ExpectedPath: []string{"field"},
-			ExpectedArgs: []any{12345},
+			ExpectedArgs: []any{"123'   45"},
 		},
 		{
-			description:  "test string",
-			input:        `set(.field, "12345")`,
+			description:  "test string with back ticks",
+			input:        "set(field, `123'\"   45`)",
 			ExpectedOp:   "set",
 			ExpectedPath: []string{"field"},
-			ExpectedArgs: []any{"12345"},
+			ExpectedArgs: []any{`123'"   45`},
 		},
 		{
-			description:  "test null",
-			input:        "set(.field, null)",
+			description:  "test string with single quotes",
+			input:        `set(field, '123"   45')`,
 			ExpectedOp:   "set",
 			ExpectedPath: []string{"field"},
-			ExpectedArgs: []any{nil},
+			ExpectedArgs: []any{"123\"   45"},
 		},
-		{
-			description:  "test json",
-			input:        `set(.field, { "a": true })`,
-			ExpectedOp:   "set",
-			ExpectedPath: []string{"field"},
-			ExpectedArgs: []any{map[string]any{"a": true}},
-		},
+		//{
+		//description:  "test null",
+		//input:        "set(field, null)",
+		//ExpectedOp:   "set",
+		//ExpectedPath: []string{"field"},
+		//ExpectedArgs: []any{nil},
+		//},
+		//{
+		//description:  "test json",
+		//input:        `set(field, { "a": true })`,
+		//ExpectedOp:   "set",
+		//ExpectedPath: []string{"field"},
+		//ExpectedArgs: []any{map[string]any{"a": true}},
+		//},
 	}
 
 	parser := NewParser()

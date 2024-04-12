@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
+	"text/scanner"
+
+	tscanner "text/scanner"
 
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
@@ -43,10 +47,64 @@ type Call struct {
 type Argument struct {
 	Float  *float64 `  @Float`
 	Int    *int     `| @Int`
-	String *string  `| @String`
 	Bool   *Boolean `| @("true" | "false")`
 	Null   bool     `| @"null"`
+	String *String  `| @@`
 	JSON   *JSON    `| @@`
+}
+
+type String string
+
+// open quote > close quote
+var stringQuotes = map[string]string{
+	`"`: `"`,
+	`'`: `'`,
+	"`": "`",
+}
+
+var stringEscape = `\`
+
+func (s *String) Parse(lex *lexer.PeekingLexer) error {
+	closingQuote, openingFound := stringQuotes[lex.Peek().Value]
+	fmt.Println("GOT HERE", lex.RawPeek().Value, openingFound)
+
+	if !openingFound {
+		return participle.NextMatch
+	}
+
+	var buf bytes.Buffer
+	var escaped bool
+	var endFound bool
+
+	buf.WriteString(lex.Next().Value)
+	fmt.Println(buf.String())
+
+	for {
+		token := lex.Next()
+
+		switch {
+		case token.EOF():
+			return errors.Errorf("EOF reached")
+		case escaped:
+			escaped = false
+		case token.Value == stringEscape:
+			escaped = true
+		case token.Value == closingQuote:
+			endFound = true
+		}
+
+		if !escaped {
+			buf.WriteString(token.Value)
+			fmt.Println(buf.String())
+		}
+
+		if endFound {
+			break
+		}
+	}
+
+	*s = String(buf.String())
+	return nil
 }
 
 type JSON struct {
@@ -82,7 +140,6 @@ func (j *JSON) Parse(lex *lexer.PeekingLexer) error {
 		}
 
 		buf.WriteString(peeked.Value)
-		fmt.Println(buf.String())
 
 		if err := json.Unmarshal(buf.Bytes(), &val); err == nil {
 			j.Val = val
@@ -103,7 +160,11 @@ type Parser struct {
 }
 
 func NewParser() *Parser {
-	parser := participle.MustBuild[Call]()
+	parser := participle.MustBuild[Call](
+		participle.Lexer(lexer.NewTextScannerLexer(func(scanner *scanner.Scanner) {
+			scanner.Mode = tscanner.ScanIdents | tscanner.ScanFloats | tscanner.ScanInts // we take care of the rest later
+		})),
+	)
 
 	return &Parser{
 		parser: parser,
@@ -124,7 +185,9 @@ func NewParser() *Parser {
 // - array indexes are not supported
 // - set(field, some spaced value) should be possible
 func (p *Parser) Parse(s string) (*OpInstance, error) {
-	parsed, err := p.parser.ParseString("", s)
+	parsed, err := p.parser.ParseString("", s,
+		participle.Trace(os.Stderr),
+	)
 
 	if err != nil {
 		return nil, err
@@ -149,7 +212,7 @@ func (p *Parser) Parse(s string) (*OpInstance, error) {
 		case arg.Float != nil:
 			args = append(args, *arg.Float)
 		case arg.String != nil:
-			args = append(args, strings.Trim(*arg.String, "\""))
+			args = append(args, strings.Trim(string(*arg.String), "\"'`"))
 		case arg.Null:
 			args = append(args, nil)
 		case arg.JSON != nil:
