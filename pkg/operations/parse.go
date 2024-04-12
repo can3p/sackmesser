@@ -36,7 +36,7 @@ var operations = map[string]Operation{
 
 type Call struct {
 	Name      string     `@Ident`
-	Path      []string   `"(" ( "." @Ident )+`
+	Path      []string   `"(" @Ident ( "." @Ident )*`
 	Arguments []Argument `( "," @@ )* ")"`
 }
 
@@ -116,15 +116,15 @@ func NewParser() *Parser {
 // with a proper implementation. Just look how we don't handle
 // anything except very simple cases!
 // We should be parsing things like
-// set(.field, "123") // set a string
-// set(.field, 123) // set a number
-// set(.field, { a: 1 }) // assign an object to a field
-// set(.field, "{ a: 1 }") // assign an string to a field
-// del(.field[0].item) // delete a field
+// set(field, "123") // set a string
+// set(field, 123) // set a number
+// set(field, { a: 1 }) // assign an object to a field
+// set(field, "{ a: 1 }") // assign an string to a field
+// del(field[0].item) // delete a field
 // Problems:
 // - Only double quotes are supported for strings which makes passing valid json a pain
 // - array indexes are not supported
-// - set(.field, some spaced value) should be possible
+// - set(field, some spaced value) should be possible
 func (p *Parser) Parse(s string) (*OpInstance, error) {
 	parsed, err := p.parser.ParseString("", s)
 
