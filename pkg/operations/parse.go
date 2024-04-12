@@ -1,10 +1,13 @@
 package operations
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/alecthomas/participle/v2"
+	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 	"github.com/pkg/errors"
 )
@@ -43,23 +46,52 @@ type Argument struct {
 	String *string  `| @String`
 	Bool   *Boolean `| @("true" | "false")`
 	Null   bool     `| @"null"`
-	//JSON   JSON     `| @@`
+	JSON   *JSON    `| @@`
 }
 
-//type JSON struct {
-//Val any
-//}
+type JSON struct {
+	Val any
+}
 
-//func (j *JSON) UnmarshalText(text []byte) error {
-//var parsed any
+// I'm sure we can have a better parser that does not try
+// to decode string in a loop, however this would most
+// probably require bringing in json parsing in sackmesser
+// and I want to keep it light.
+//
+// In addition, the assumption is that most of the json
+// objects in the arguments would be very small
+func (j *JSON) Parse(lex *lexer.PeekingLexer) error {
+	var buf bytes.Buffer
 
-//if err := json.Unmarshal(text, &parsed); err != nil {
-//return err
-//}
+	token := lex.Peek()
 
-//j.Val = parsed
-//return nil
-//}
+	if token.Value != "[" && token.Value != "{" {
+		// unpeek there
+		return participle.NextMatch
+	}
+
+	buf.WriteString(lex.Next().Value)
+
+	var val any
+
+	fmt.Println(buf.String())
+
+	for {
+		peeked := lex.Next()
+
+		if peeked.EOF() {
+			return errors.Errorf("EOF reached")
+		}
+
+		buf.WriteString(peeked.Value)
+		fmt.Println(buf.String())
+
+		if err := json.Unmarshal(buf.Bytes(), &val); err == nil {
+			j.Val = val
+			return nil
+		}
+	}
+}
 
 type Boolean bool
 
@@ -73,9 +105,7 @@ type Parser struct {
 }
 
 func NewParser() *Parser {
-	parser := participle.MustBuild[Call](
-		participle.Unquote("String"),
-	)
+	parser := participle.MustBuild[Call]()
 
 	return &Parser{
 		parser: parser,
@@ -121,9 +151,11 @@ func (p *Parser) Parse(s string) (*OpInstance, error) {
 		case arg.Float != nil:
 			args = append(args, *arg.Float)
 		case arg.String != nil:
-			args = append(args, *arg.String)
+			args = append(args, strings.Trim(*arg.String, "\""))
 		case arg.Null:
 			args = append(args, nil)
+		case arg.JSON != nil:
+			args = append(args, arg.JSON.Val)
 		}
 	}
 
