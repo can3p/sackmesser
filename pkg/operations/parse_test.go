@@ -3,6 +3,8 @@ package operations
 import (
 	"strings"
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestParse(t *testing.T) {
@@ -69,19 +71,8 @@ func TestParse(t *testing.T) {
 		expectedPath := strings.Join(ex.ExpectedPath, ".")
 		gotPath := strings.Join(parsed.Path, ".")
 
-		if expectedPath != gotPath {
-			t.Errorf("[%d - %s] expected path %s, but got %s", idx+1, ex.description, expectedPath, gotPath)
-		}
+		assert.Equal(t, ex.ExpectedPath, parsed.Path, "[%d - %s] expected path %s, but got %s", idx+1, ex.description, expectedPath, gotPath)
 
-		if len(ex.ExpectedArgs) != len(parsed.Args) {
-			t.Errorf("[%d - %s] expected %d args, but got %d", idx+1, ex.description, len(ex.ExpectedArgs), len(parsed.Args))
-			continue
-		}
-
-		for argIdx, expected := range ex.ExpectedArgs {
-			if expected != parsed.Args[argIdx] {
-				t.Errorf("[%d - %s] arg %d: expected %v, but got %v", idx+1, ex.description, argIdx, expected, parsed.Args[argIdx])
-			}
-		}
+		assert.Equal(t, ex.ExpectedArgs, parsed.Args, "[%d - %s] arguments mismatch", idx+1, ex.description)
 	}
 }
