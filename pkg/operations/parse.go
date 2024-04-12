@@ -1,17 +1,11 @@
 package operations
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
-	"text/scanner"
-
-	tscanner "text/scanner"
 
 	"github.com/alecthomas/participle/v2"
-	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 	"github.com/pkg/errors"
 )
@@ -49,103 +43,25 @@ type Argument struct {
 	Int    *int     `| @Int`
 	Bool   *Boolean `| @("true" | "false")`
 	Null   bool     `| @"null"`
-	String *String  `| @@`
-	JSON   *JSON    `| @@`
-}
-
-type String string
-
-// open quote > close quote
-var stringQuotes = map[string]string{
-	`"`: `"`,
-	`'`: `'`,
-	"`": "`",
-}
-
-var stringEscape = `\`
-
-func (s *String) Parse(lex *lexer.PeekingLexer) error {
-	closingQuote, openingFound := stringQuotes[lex.Peek().Value]
-	fmt.Println("GOT HERE", lex.RawPeek().Value, openingFound)
-
-	if !openingFound {
-		return participle.NextMatch
-	}
-
-	var buf bytes.Buffer
-	var escaped bool
-	var endFound bool
-
-	buf.WriteString(lex.Next().Value)
-	fmt.Println(buf.String())
-
-	for {
-		token := lex.Next()
-
-		switch {
-		case token.EOF():
-			return errors.Errorf("EOF reached")
-		case escaped:
-			escaped = false
-		case token.Value == stringEscape:
-			escaped = true
-		case token.Value == closingQuote:
-			endFound = true
-		}
-
-		if !escaped {
-			buf.WriteString(token.Value)
-			fmt.Println(buf.String())
-		}
-
-		if endFound {
-			break
-		}
-	}
-
-	*s = String(buf.String())
-	return nil
+	String *string  `| @String`
+	JSON   *JSON    `| @JSON`
 }
 
 type JSON struct {
 	Val any
 }
 
-// I'm sure we can have a better parser that does not try
-// to decode string in a loop, however this would most
-// probably require bringing in json parsing in sackmesser
-// and I want to keep it light.
-//
-// In addition, the assumption is that most of the json
-// objects in the arguments would be very small
-func (j *JSON) Parse(lex *lexer.PeekingLexer) error {
-	var buf bytes.Buffer
-
-	token := lex.Peek()
-
-	if token.Value != "[" && token.Value != "{" {
-		// unpeek there
-		return participle.NextMatch
-	}
-
-	buf.WriteString(lex.Next().Value)
-
+// It's unfortunate that we have parse json one more time
+// instead of having the value in the token already
+func (b *JSON) Capture(values []string) error {
 	var val any
 
-	for {
-		peeked := lex.Next()
-
-		if peeked.EOF() {
-			return errors.Errorf("EOF reached")
-		}
-
-		buf.WriteString(peeked.Value)
-
-		if err := json.Unmarshal(buf.Bytes(), &val); err == nil {
-			j.Val = val
-			return nil
-		}
+	if err := json.Unmarshal([]byte(values[0]), &val); err != nil {
+		return err
 	}
+
+	(*b).Val = val
+	return nil
 }
 
 type Boolean bool
@@ -161,9 +77,7 @@ type Parser struct {
 
 func NewParser() *Parser {
 	parser := participle.MustBuild[Call](
-		participle.Lexer(lexer.NewTextScannerLexer(func(scanner *scanner.Scanner) {
-			scanner.Mode = tscanner.ScanIdents | tscanner.ScanFloats | tscanner.ScanInts // we take care of the rest later
-		})),
+		participle.Lexer(NewCustomTextScannerLexer()),
 	)
 
 	return &Parser{
@@ -185,9 +99,7 @@ func NewParser() *Parser {
 // - array indexes are not supported
 // - set(field, some spaced value) should be possible
 func (p *Parser) Parse(s string) (*OpInstance, error) {
-	parsed, err := p.parser.ParseString("", s,
-		participle.Trace(os.Stderr),
-	)
+	parsed, err := p.parser.ParseString("", s) //participle.Trace(os.Stderr),
 
 	if err != nil {
 		return nil, err
