@@ -35,7 +35,7 @@ var operations = map[string]Operation{
 type Call struct {
 	Name      string     `@Ident`
 	Path      []string   `"(" @Ident ( "." @Ident )*`
-	Arguments []Argument `( "," @@ )* ")"`
+	Arguments []Argument `( "," @@ )+ ")"`
 }
 
 type Argument struct {
@@ -43,7 +43,7 @@ type Argument struct {
 	Int    *int     `| @Int`
 	Bool   *Boolean `| @("true" | "false")`
 	Null   bool     `| @"null"`
-	String *string  `| @String`
+	String *string  `| @String | @Ident`
 	JSON   *JSON    `| @JSON`
 }
 
@@ -85,21 +85,20 @@ func NewParser() *Parser {
 	}
 }
 
-// Parse is very naive at the moment, feel free to replace
-// with a proper implementation. Just look how we don't handle
-// anything except very simple cases!
 // We should be parsing things like
 // set(field, "123") // set a string
 // set(field, 123) // set a number
 // set(field, { a: 1 }) // assign an object to a field
 // set(field, "{ a: 1 }") // assign an string to a field
-// del(field[0].item) // delete a field
+// del(field.item) // delete a field
 // Problems:
 // - Only double quotes are supported for strings which makes passing valid json a pain
 // - array indexes are not supported
-// - set(field, some spaced value) should be possible
 func (p *Parser) Parse(s string) (*OpInstance, error) {
-	parsed, err := p.parser.ParseString("", s) //participle.Trace(os.Stderr),
+	//parsed, err := p.parser.ParseString("", s,
+	//participle.Trace(os.Stderr),
+	//)
+	parsed, err := p.parser.ParseString("", s)
 
 	if err != nil {
 		return nil, err

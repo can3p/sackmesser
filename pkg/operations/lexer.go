@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"io"
 	"strings"
-	"text/scanner"
-	tscanner "text/scanner"
+
+	"github.com/can3p/sackmesser/pkg/scanner"
 
 	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/pkg/errors"
@@ -45,7 +45,7 @@ func (d *textScannerLexerDefinition) Symbols() map[string]lexer.TokenType {
 		"Int":    scanner.Int,
 		"Float":  scanner.Float,
 		"String": scanner.String,
-		"JSON":   1 << -scanner.String,
+		"JSON":   scanner.JSON,
 	}
 }
 
@@ -64,7 +64,6 @@ type textScannerLexer struct {
 func Lex(filename string, r io.Reader) lexer.Lexer {
 	s := &scanner.Scanner{}
 	s.Init(r)
-	s.Mode = tscanner.ScanIdents | tscanner.ScanFloats | tscanner.ScanInts // we take care of the rest later
 	lexerStruct := lexWithScanner(filename, s)
 	lexerStruct.scanner.Error = func(s *scanner.Scanner, msg string) {
 		lexerStruct.err = &lexer.Error{Msg: msg, Pos: lexer.Position(lexerStruct.scanner.Pos())}
@@ -183,45 +182,8 @@ func (t *textScannerLexer) parseJSON() (string, error) {
 }
 
 func (t *textScannerLexer) Next() (lexer.Token, error) {
-	// all the code was forked just to add different kinds of strings
-	// to the lexer as well as json
-	ch := t.scanner.Peek()
-
-	// skip white space
-	for ch == ' ' || ch == '\t' {
-		// this is pure evil, Next actually does not return the next char,
-		// it returns the one before that
-		_ = t.scanner.Next()
-		ch = t.scanner.Peek()
-	}
-
-	var text string
-	var err error
-	var typ rune
-
-	switch ch {
-	case '\'':
-		fallthrough
-	case '"':
-		fallthrough
-	case '`':
-		text, err = t.parseString()
-		if err != nil {
-			return lexer.Token{}, err
-		}
-		typ = scanner.String
-	case '[':
-		fallthrough
-	case '{':
-		text, err = t.parseJSON()
-		if err != nil {
-			return lexer.Token{}, err
-		}
-		typ = 1 << -scanner.String
-	default:
-		typ = t.scanner.Scan()
-		text = t.scanner.TokenText()
-	}
+	typ := t.scanner.Scan()
+	text := t.scanner.TokenText()
 
 	pos := lexer.Position(t.scanner.Position)
 	pos.Filename = t.filename

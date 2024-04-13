@@ -59,6 +59,13 @@ func TestParse(t *testing.T) {
 			ExpectedArgs: []any{"123\"   45"},
 		},
 		{
+			description:  "test bare word without quotes",
+			input:        `set(field, awesome)`,
+			ExpectedOp:   "set",
+			ExpectedPath: []string{"field"},
+			ExpectedArgs: []any{"awesome"},
+		},
+		{
 			description:  "test null",
 			input:        "set(field, null)",
 			ExpectedOp:   "set",
