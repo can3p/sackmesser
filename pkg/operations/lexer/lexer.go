@@ -1,15 +1,13 @@
-package operations
+package lexer
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"strings"
 
-	"github.com/can3p/sackmesser/pkg/scanner"
+	"github.com/can3p/sackmesser/pkg/operations/lexer/scanner"
 
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/pkg/errors"
 )
 
 // butchered version of https://github.com/alecthomas/participle/blob/master/lexer/text_scanner.go
@@ -95,90 +93,6 @@ func LexBytes(filename string, b []byte) lexer.Lexer {
 // LexString returns a new default lexer over a string.
 func LexString(filename, s string) lexer.Lexer {
 	return Lex(filename, strings.NewReader(s))
-}
-
-// open quote > close quote
-var stringQuotes = map[rune]rune{
-	'"':  '"',
-	'\'': '\'',
-	'`':  '`',
-}
-
-var stringEscape = '\\'
-
-func (t *textScannerLexer) parseString() (string, error) {
-	ch := t.scanner.Peek()
-
-	closingQuote, openingFound := stringQuotes[ch]
-
-	if !openingFound {
-		return "", errors.Errorf("Unknown string quote: [%c]", ch)
-	}
-
-	var buf bytes.Buffer
-	var escaped bool
-	var endFound bool
-
-	buf.WriteRune(ch)
-
-	for {
-		_ = t.scanner.Next()
-		ch = t.scanner.Peek()
-
-		switch {
-		case ch == '\n' || ch < 0:
-			return "", errors.Errorf("Liternal not terminated")
-		case escaped:
-			escaped = false
-		case ch == stringEscape:
-			escaped = true
-		case ch == closingQuote:
-			endFound = true
-		}
-
-		if !escaped {
-			buf.WriteRune(ch)
-		}
-
-		if endFound {
-			break
-		}
-	}
-
-	// advance scanner by one to point to the first non parsed char
-	_ = t.scanner.Next()
-
-	return buf.String(), nil
-}
-
-func (t *textScannerLexer) parseJSON() (string, error) {
-	ch := t.scanner.Peek()
-	var buf bytes.Buffer
-
-	if ch != '[' && ch != '{' {
-		return "", errors.Errorf("Unexpected start of json input")
-	}
-
-	buf.WriteRune(ch)
-
-	var val any
-
-	for {
-		_ = t.scanner.Next()
-		ch = t.scanner.Peek()
-
-		if ch < 0 {
-			return "", errors.Errorf("EOF reached")
-		}
-
-		buf.WriteRune(ch)
-
-		if err := json.Unmarshal(buf.Bytes(), &val); err == nil {
-			// advance scanner by one to point to the first non parsed char
-			_ = t.scanner.Next()
-			return buf.String(), nil
-		}
-	}
 }
 
 func (t *textScannerLexer) Next() (lexer.Token, error) {

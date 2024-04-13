@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/participle/v2"
+	"github.com/can3p/sackmesser/pkg/operations/lexer"
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 	"github.com/pkg/errors"
 )
@@ -77,7 +78,7 @@ type Parser struct {
 
 func NewParser() *Parser {
 	parser := participle.MustBuild[Call](
-		participle.Lexer(NewCustomTextScannerLexer()),
+		participle.Lexer(lexer.NewCustomTextScannerLexer()),
 	)
 
 	return &Parser{
