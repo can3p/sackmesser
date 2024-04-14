@@ -33,12 +33,14 @@ var operations = map[string]Operation{
 	"del": Delete,
 }
 
+//nolint:govet
 type Call struct {
 	Name      string        `@Ident`
 	Path      []PathElement `"(" (@Ident | @String ) ( "." (@Ident | @String) )*`
 	Arguments []Argument    `( "," @@ )* ")"`
 }
 
+//nolint:govet
 type Argument struct {
 	Float  *float64 `  @Float`
 	Int    *int     `| @Int`

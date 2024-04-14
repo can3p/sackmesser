@@ -2,9 +2,10 @@ package simpleyaml
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"reflect"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 )
@@ -164,8 +165,6 @@ func (n *jnode) NodeType() types.NodeType {
 	if isNil {
 		return types.NodeTypeNull
 	}
-
-	fmt.Println(n.vType.Kind())
 
 	switch n.vType.Kind() {
 	case reflect.Bool:
