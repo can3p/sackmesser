@@ -21,6 +21,7 @@ type Node interface {
 	Visit(field string) (Node, error)
 	NodeType() NodeType
 	Value() any
+	GetField(field string) (any, error)
 	SetField(field string, value any) error
 	DeleteField(field string) error
 	Serialize() ([]byte, error)

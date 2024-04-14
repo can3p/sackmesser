@@ -71,6 +71,20 @@ func (n *jnode) Visit(field string) (types.Node, error) {
 	panic("unreachable")
 }
 
+func (n *jnode) GetField(field string) (any, error) {
+	typed, ok := n.v.(map[string]any)
+
+	if !ok {
+		return nil, types.ErrWrongVisit
+	}
+
+	if value, ok := typed[field]; ok {
+		return value, nil
+	}
+
+	return nil, types.ErrFieldMissing
+}
+
 func (n *jnode) SetField(field string, value any) error {
 	switch n.NodeType() {
 	case types.NodeTypeNull:
