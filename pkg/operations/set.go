@@ -7,7 +7,7 @@ import (
 
 func Set(root types.Node, path []string, args ...any) error {
 	if len(args) != 1 {
-		return errors.Errorf("add operation expects one argument")
+		return errors.Errorf("set operation expects one argument")
 	}
 
 	value := args[0]
