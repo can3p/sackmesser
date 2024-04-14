@@ -91,7 +91,7 @@ $ echo '{ "a":1 }' | sackmesser mod 'set(prop, { "test": 123 }'
     "prop": {
         "test": 123
     }
-}%
+}
 ```
 
 You can always spit out a different format if you want!
