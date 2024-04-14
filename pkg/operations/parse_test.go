@@ -93,6 +93,13 @@ func TestParse(t *testing.T) {
 			ExpectedPath: []string{"field"},
 			ExpectedArgs: []any{map[string]any{"a": true}},
 		},
+		{
+			description:  "test one more json",
+			input:        `set(field, { "abc": [1,2, false] })`,
+			ExpectedOp:   "set",
+			ExpectedPath: []string{"field"},
+			ExpectedArgs: []any{map[string]any{"abc": []any{float64(1), float64(2), false}}},
+		},
 	}
 
 	parser := NewParser()

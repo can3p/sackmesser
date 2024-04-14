@@ -3,6 +3,8 @@ module github.com/can3p/sackmesser
 go 1.22.0
 
 require (
+	github.com/alecthomas/assert/v2 v2.8.1
+	github.com/alecthomas/participle/v2 v2.1.1
 	github.com/can3p/kleiner v0.0.11
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
@@ -11,8 +13,6 @@ require (
 
 require (
 	aead.dev/minisign v0.2.0 // indirect
-	github.com/alecthomas/assert/v2 v2.8.1 // indirect
-	github.com/alecthomas/participle/v2 v2.1.1 // indirect
 	github.com/alecthomas/repr v0.4.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-resty/resty/v2 v2.11.0 // indirect

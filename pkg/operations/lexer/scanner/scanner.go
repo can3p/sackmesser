@@ -581,9 +581,7 @@ func (s *Scanner) scanString(quote rune) (n int) {
 func (s *Scanner) scanJSON() (ch rune) {
 	var val any
 
-	i := 0
-	for i < 20 {
-		i++
+	for {
 		ch = s.next()
 
 		if ch < 0 {
@@ -598,12 +596,12 @@ func (s *Scanner) scanJSON() (ch rune) {
 			buf.Write(s.srcBuf[s.tokPos:s.srcPos])
 		}
 
+		fmt.Println("buf", buf.String())
+
 		if err := json.Unmarshal(buf.Bytes(), &val); err == nil {
 			return ch
 		}
 	}
-
-	return ch
 }
 
 // Scan reads the next token or Unicode character from source and returns it.
