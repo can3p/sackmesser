@@ -224,6 +224,16 @@ func Parse(b []byte) (types.Node, error) {
 	}, nil
 }
 
+func MustParse(b []byte) types.Node {
+	n, err := Parse(b)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return n
+}
+
 func FromNode(n types.Node) types.Node {
 	j := n.Value()
 
