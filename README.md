@@ -7,7 +7,8 @@ Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will t
 
 ## Capabilities
 
-* Input and output formats are disconnected
+* Supports mutation only, you cannot query json with `sackmesser`
+* Input and output formats are disconnected, both yaml and json are supported
 * Operations: set field, delete field
 * Supports multiple operations in one go
 
@@ -18,7 +19,7 @@ Operations have a signature like `op_name(path, args*)` where
 * path is dot delimited, you could use quotes in case field names contain spaces and alike:
 
   ```
-  echo '{ "a" : { "test prop": 1 } }' | go run . mod 'set(a."test prop", "test")'               [24-04-14| 2:16AM]
+  echo '{ "a" : { "test prop": 1 } }' | sackmesser mod 'set(a."test prop", "test")'
   {
     "a": {
       "test prop": "test"
@@ -160,29 +161,18 @@ The project has been scaffolded with the help of [kleiner](https://github.com/ca
 
 ## TODO
 
-Current syntax sucks, because
-
-- It's only possible to specify one operation
-- No aggregations, merges
-- sackmesser will not create a chain of nested objects for you if you give a path that includes non existing fields. Ideally this should work: `echo '{}' | sackmesser mod 'a.b.c.d' 123`
-
-Parsers are not perfect as well
-
-- Indentation settings are hardcoded
-- Ideally the updated json should be formatted identically to the input except modified fields, unless specifically asked for
-
-And in general
-
+- More operations
 - Some tests will be helpful
 
-Some dream scenarios:
-
-- `echo { "a": 1 } | sackmesser 'inc(.a)' -> { "a": 2 }`
-- `echo { "a": 1 } | sackmesser 'inc(.a)' '.b = true' -> { "a": 2, "b": true }`
-- `echo { "a": [1,2,3] } | sackmesser '.len = len(.a)' -> { "a": [1,2,3], len: 3 }`
-- `echo { "props": [ { "field": "value1 }, { "field2": "value1 } ] } | sackmesser '.props[].index = index()' -> { "props": [ { "index": 0, "field": "value1 }, { "index": 1, "field2": "value1 } ] }`
-
 Or somethings like this, suggestions welcome!
+
+## Prior art
+
+There are awesome alternatives to `sackmesser`, which should be considered as well!
+
+* [jq](https://jqlang.github.io/jq/) - legendary json processor. Compared to `sackmesser` has infinite capabilities
+  heavily skewed towards reading the data, however mutation is also possible, works with json only
+* [jj](https://github.com/tidwall/jj) - this tool is optimised for speed and supports json lines. Compared to `sackmesser` it only supports one operation at time and is optimised for speed
 
 ## License
 
