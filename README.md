@@ -105,6 +105,22 @@ prop:
     test: 123
 ```
 
+### Merge path with an object
+
+This may come in handy in case you want to apply some specific values to a json template
+
+```
+echo '{ "a" : { "test prop": { "abc": true } } }' | sackmesser mod 'merge(a."test prop", { "testme": true })'
+{
+  "a": {
+    "test prop": {
+      "abc": true,
+      "testme": true
+    }
+  }
+}
+```
+
 ### Delete a field
 
 ```
