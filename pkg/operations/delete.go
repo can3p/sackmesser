@@ -4,7 +4,7 @@ import (
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 )
 
-func Delete(root types.Node, path []string) error {
+func Delete(root types.Node, path []string, args ...any) error {
 	if len(path) == 1 {
 		return root.DeleteField(path[0])
 	}

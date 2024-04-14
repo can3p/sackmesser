@@ -4,23 +4,20 @@ Copyright © 2024 Dmitrii Petrov <dpetroff@gmail.com>
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/can3p/sackmesser/pkg/cobrahelpers"
 	"github.com/can3p/sackmesser/pkg/operations"
 	"github.com/can3p/sackmesser/pkg/traverse/simplejson"
 	"github.com/can3p/sackmesser/pkg/traverse/simpleyaml"
 	"github.com/can3p/sackmesser/pkg/traverse/types"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 func ModCommand() *cobra.Command {
-	var deleteField bool
-	var jsonValue bool
 	var inputFormat string
 	var outputFormat string
 
@@ -52,32 +49,22 @@ func ModCommand() *cobra.Command {
 			}
 
 			if len(args) > 0 {
-				path := strings.Split(strings.TrimLeft(args[0], "."), ".")
+				ops := []*operations.OpInstance{}
+				parser := operations.NewParser()
 
-				if err != nil {
-					return err
+				for _, arg := range args {
+					op, err := parser.Parse(arg)
+
+					if err != nil {
+						return errors.Wrapf(err, "Invalid operation: [%s]", arg)
+					}
+
+					ops = append(ops, op)
 				}
 
-				if deleteField {
-					if err := operations.Delete(root, path); err != nil {
-						return err
-					}
-				} else {
-
-					if len(args) < 2 {
-						panic("set operation requires at least two arguments")
-					}
-
-					var val any = args[1]
-
-					if jsonValue {
-						if err := json.Unmarshal([]byte(args[1]), &val); err != nil {
-							return err
-						}
-					}
-
-					if err := operations.Set(root, path, val); err != nil {
-						return err
+				for _, op := range ops {
+					if err := op.Apply(root); err != nil {
+						return errors.Wrapf(err, "failed to apply operation: %s", op.String())
 					}
 				}
 			}
@@ -105,8 +92,6 @@ func ModCommand() *cobra.Command {
 		},
 	}
 
-	modCmd.Flags().BoolVarP(&deleteField, "delete", "d", false, "delete field from a given path")
-	modCmd.Flags().BoolVarP(&jsonValue, "json", "j", false, "parse value as json")
 	modCmd.Flags().Var(cobrahelpers.NewEnumFlag(&inputFormat, "json", "json", "yaml"), "input-format", `input format: json or yaml`)
 	modCmd.Flags().Var(cobrahelpers.NewEnumFlag(&outputFormat, "json", "json", "yaml"), "output-format", `input format: json or yaml`)
 
