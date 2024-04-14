@@ -596,8 +596,6 @@ func (s *Scanner) scanJSON() (ch rune) {
 			buf.Write(s.srcBuf[s.tokPos:s.srcPos])
 		}
 
-		fmt.Println("buf", buf.String())
-
 		if err := json.Unmarshal(buf.Bytes(), &val); err == nil {
 			return ch
 		}
