@@ -34,9 +34,9 @@ var operations = map[string]Operation{
 }
 
 type Call struct {
-	Name      string     `@Ident`
-	Path      []string   `"(" @Ident ( "." @Ident )*`
-	Arguments []Argument `( "," @@ )+ ")"`
+	Name      string        `@Ident`
+	Path      []PathElement `"(" (@Ident | @String ) ( "." (@Ident | @String) )*`
+	Arguments []Argument    `( "," @@ )* ")"`
 }
 
 type Argument struct {
@@ -46,6 +46,13 @@ type Argument struct {
 	Null   bool     `| @"null"`
 	String *string  `| @String | @Ident`
 	JSON   *JSON    `| @JSON`
+}
+
+type PathElement string
+
+func (b *PathElement) Capture(values []string) error {
+	*b = PathElement(strings.Trim(values[0], "\"'`"))
+	return nil
 }
 
 type JSON struct {
@@ -132,10 +139,15 @@ func (p *Parser) Parse(s string) (*OpInstance, error) {
 		}
 	}
 
+	path := make([]string, 0, len(parsed.Path))
+	for _, p := range parsed.Path {
+		path = append(path, string(p))
+	}
+
 	return &OpInstance{
 		Op:   op,
 		Name: opName,
-		Path: parsed.Path,
+		Path: path,
 		Args: args,
 	}, nil
 }

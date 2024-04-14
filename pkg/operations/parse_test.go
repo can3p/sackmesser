@@ -17,6 +17,20 @@ func TestParse(t *testing.T) {
 		ExpectedPath []string
 	}{
 		{
+			description:  "test nested path",
+			input:        "set(field.another_field, true)",
+			ExpectedOp:   "set",
+			ExpectedPath: []string{"field", "another_field"},
+			ExpectedArgs: []any{true},
+		},
+		{
+			description:  "test path with strings",
+			input:        "set(field.\"another field\", true)",
+			ExpectedOp:   "set",
+			ExpectedPath: []string{"field", "another field"},
+			ExpectedArgs: []any{true},
+		},
+		{
 			description:  "test boolean",
 			input:        "set(field, true)",
 			ExpectedOp:   "set",

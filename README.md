@@ -1,6 +1,6 @@
 #  Sackmesser - your cli to modify json/yaml on the fly
 
-__Warning: sackmesser is a prototype at the moment, do not expect the api to be stable
+__Warning: sackmesser is a prototype at the moment, do not expect the api to be stable__
 
 Remember all those times where you had to save json in order to find and update a single field?
 Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will take care of that.
@@ -8,7 +8,36 @@ Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will t
 ## Capabilities
 
 * Input and output formats are disconnected
-* Support: set field, delete field
+* Operations: set field, delete field
+* Supports multiple operations in one go
+
+## Operations
+
+Operations have a signature like `op_name(path, args*)` where
+
+* path is dot delimited, you could use quotes in case field names contain spaces and alike:
+
+  ```
+  echo '{ "a" : { "test prop": 1 } }' | go run . mod 'set(a."test prop", "test")'               [24-04-14| 2:16AM]
+  {
+    "a": {
+      "test prop": "test"
+    }
+  }
+  ```
+
+* Zero or more arguments are required for an operation. Argument could be one of
+  - a number
+  - `null`
+  - A string, you could use single, double quotes and backticks as quotes to minimize escaping
+  - A json value
+
+Available operations:
+
+| Operation  | Description |
+| ------------- | ------------- |
+| set(path, value)  | assign field to a particular value  |
+| del(path)  | delete a key  |
 
 ## Examples:
 
@@ -27,17 +56,35 @@ prop:
 ### Set a field with a value
 
 ```
-$ echo '{ "a":1 }' | sackmesser mod '.prop' '{ "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod 'set(prop, `{ "test": 123 }`'
 {
   "a": 1,
   "prop": "{ \"test\": 123 }"
 }
 ```
 
+Please note that you can use three types of quotes for strings - double quotes, single quotes and backticks
+
+```
+$ echo '{ "a":1 }' | sackmesser mod "set(prop, 'value')"
+{
+  "a": 1,
+  "prop": "value"
+}
+```
+
+```
+$ echo '{ "a":1 }' | sackmesser mod "set(prop, `value`)"
+{
+  "a": 1,
+  "prop": "value"
+}
+```
+
 ### Set a field with a value that will be parse as a json first
 
 ```
-$ echo '{ "a":1 }' | sackmesser mod -j '.prop' '{ "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod 'set(prop, { "test": 123 }'
 {
     "a": 1,
     "prop": {
@@ -49,7 +96,8 @@ $ echo '{ "a":1 }' | sackmesser mod -j '.prop' '{ "test": 123 }'
 You can always spit out a different format if you want!
 
 ```
-$ echo '{ "a":1 }' | sackmesser mod --output-format yaml -j '.prop' '{ "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod --output-format yaml 'set(prop, { "test": 123 }'
+{
 a: 1
 prop:
     test: 123
@@ -58,9 +106,21 @@ prop:
 ### Delete a field
 
 ```
-echo '{ "a":1, "deleteme": "please" }' | sackmesser mod -d '.deleteme'
+echo '{ "a":1, "deleteme": "please" }' | sackmesser mod 'del(deleteme)'
 {
   "a": 1
+}
+```
+
+### Chain commands
+
+You can supply as many commands as you like if needed
+
+```
+echo '{ "a":1, "deleteme": "please" }' | sackmesser mod 'set(b, "test")' 'del(deleteme)'
+{
+  "a": 1,
+  "b "test",
 }
 ```
 
