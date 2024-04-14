@@ -29,8 +29,9 @@ func (op *OpInstance) Apply(root types.Node) error {
 }
 
 var operations = map[string]Operation{
-	"set": Set,
-	"del": Delete,
+	"set":   Set,
+	"del":   Delete,
+	"merge": Merge,
 }
 
 //nolint:govet
