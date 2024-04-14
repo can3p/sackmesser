@@ -11,7 +11,9 @@ func Delete(root types.Node, path []string, args ...any) error {
 
 	node, err := root.Visit(path[0])
 
-	if err != nil {
+	if err == types.ErrFieldMissing {
+		return nil
+	} else if err != nil {
 		return err
 	}
 
