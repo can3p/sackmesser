@@ -86,6 +86,7 @@ func ModCommand() *cobra.Command {
 				return err
 			}
 
+			// nolint:forbidigo
 			fmt.Print(string(out))
 
 			return nil
