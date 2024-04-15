@@ -41,6 +41,7 @@ Available operations:
 | del(path)  | delete a key  |
 | merge(path, value)  | merge json value into the path. Only JSON values are allowed  |
 | pop(path)  | remove last element from an array  |
+| push(path, value)  | add new element to an array  |
 
 ## Examples:
 
