@@ -5,11 +5,7 @@ import (
 )
 
 func Delete(root types.Node, path []string, args ...any) error {
-	if len(path) == 1 {
-		return root.DeleteField(path[0])
-	}
-
-	node, err := root.Visit(path[0])
+	node, lastChunk, err := traverseButOne(root, path)
 
 	if err == types.ErrFieldMissing {
 		return nil
@@ -17,5 +13,5 @@ func Delete(root types.Node, path []string, args ...any) error {
 		return err
 	}
 
-	return Delete(node, path[1:])
+	return node.DeleteField(lastChunk)
 }

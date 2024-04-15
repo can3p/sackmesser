@@ -15,29 +15,24 @@ func Merge(root types.Node, path []string, args ...any) error {
 		return errors.Errorf("Merge expects a json as an argument")
 	}
 
-	if len(path) == 1 {
-		fieldName := path[0]
-		fieldVal, err := root.GetField(fieldName)
-
-		if err == types.ErrFieldMissing {
-			return root.SetField(fieldName, value)
-		}
-
-		if err != nil {
-			return err
-		}
-
-		fieldVal = mergeObject(fieldVal, value)
-		return root.SetField(fieldName, fieldVal)
-	}
-
-	node, err := root.Visit(path[0])
+	node, fieldName, err := traverseButOne(root, path)
 
 	if err != nil {
 		return err
 	}
 
-	return Merge(node, path[1:], value)
+	fieldVal, err := node.GetField(fieldName)
+
+	if err == types.ErrFieldMissing {
+		return node.SetField(fieldName, value)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	fieldVal = mergeObject(fieldVal, value)
+	return node.SetField(fieldName, fieldVal)
 }
 
 func mergeObject(existingValue any, value map[string]any) any {

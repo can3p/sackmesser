@@ -12,15 +12,11 @@ func Set(root types.Node, path []string, args ...any) error {
 
 	value := args[0]
 
-	if len(path) == 1 {
-		return root.SetField(path[0], value)
-	}
-
-	node, err := root.Visit(path[0])
+	node, lastChunk, err := traverseButOne(root, path)
 
 	if err != nil {
 		return err
 	}
 
-	return Set(node, path[1:], value)
+	return node.SetField(lastChunk, value)
 }
