@@ -3,6 +3,8 @@ package operations
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/alecthomas/participle/v2"
@@ -11,17 +13,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Operation func(root types.Node, path []string, args ...any) error
+type Operation func(root types.Node, path []types.PathElement, args ...any) error
 
 type OpInstance struct {
 	Op   Operation
 	Name string
-	Path []string
+	Path types.PathElementSlice
 	Args []any
 }
 
 func (op *OpInstance) String() string {
-	return fmt.Sprintf("Op: %s, Path: %s, Args: %v", op.Name, strings.Join(op.Path, "."), op.Args)
+	return fmt.Sprintf("Op: %s, Path: %s, Args: %v", op.Name, op.Path.String(), op.Args)
 }
 
 func (op *OpInstance) Apply(root types.Node) error {
@@ -37,7 +39,7 @@ var operations = map[string]Operation{
 //nolint:govet
 type Call struct {
 	Name      string        `@Ident`
-	Path      []PathElement `"(" (@Ident | @String ) ( "." (@Ident | @String) )*`
+	Path      []PathElement `"(" @@+`
 	Arguments []Argument    `( "," @@ )* ")"`
 }
 
@@ -51,10 +53,40 @@ type Argument struct {
 	JSON   *JSON    `| @JSON`
 }
 
-type PathElement string
+//nolint:govet
+type PathElement struct {
+	// potential foot gun there, I did not want to have a
+	// leading dot, but I could not write a grammar rule
+	// to exclude it from the first match only, hence
+	// I've made it optional
+	ObjectField StringPathElement   ` "."? (@String | @Ident)`
+	ArrayIdx    ArrIndexPathElement ` | @JSON`
+}
 
-func (b *PathElement) Capture(values []string) error {
-	*b = PathElement(strings.Trim(values[0], "\"'`"))
+type StringPathElement string
+
+func (b *StringPathElement) Capture(values []string) error {
+	*b = StringPathElement(strings.Trim(values[0], "\"'`"))
+	return nil
+}
+
+type ArrIndexPathElement int
+
+var arrayAccessRE = regexp.MustCompile(`\[-?\d+\]`)
+
+// we need to do this because lexer will return text like `[0]` as a single token because of json
+func (b *ArrIndexPathElement) Capture(values []string) error {
+	if !arrayAccessRE.MatchString(values[0]) {
+		return errors.Errorf("Not an array lookup")
+	}
+
+	idx, err := strconv.Atoi(strings.Trim(values[0], "[]"))
+
+	if err != nil {
+		return err
+	}
+
+	*b = ArrIndexPathElement(idx)
 	return nil
 }
 
@@ -142,9 +174,14 @@ func (p *Parser) Parse(s string) (*OpInstance, error) {
 		}
 	}
 
-	path := make([]string, 0, len(parsed.Path))
+	// I've duplicated types to keep parsing data structures
+	// and traversal api independent
+	path := make([]types.PathElement, 0, len(parsed.Path))
 	for _, p := range parsed.Path {
-		path = append(path, string(p))
+		path = append(path, types.PathElement{
+			ObjectField: string(p.ObjectField),
+			ArrayIdx:    int(p.ArrayIdx),
+		})
 	}
 
 	return &OpInstance{

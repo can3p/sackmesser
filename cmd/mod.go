@@ -69,7 +69,7 @@ func ModCommand() *cobra.Command {
 				}
 			}
 
-			var outputRoot types.Node
+			var outputRoot types.RootNode
 
 			switch outputFormat {
 			case "yaml":

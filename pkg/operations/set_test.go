@@ -5,6 +5,7 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/can3p/sackmesser/pkg/traverse/simplejson"
+	"github.com/can3p/sackmesser/pkg/traverse/types"
 )
 
 func TestSetOperation(t *testing.T) {
@@ -12,14 +13,14 @@ func TestSetOperation(t *testing.T) {
 
 	examples := []struct {
 		description string
-		path        []string
+		path        []types.PathElement
 		arg         any
 		expected    string
 		isErr       bool
 	}{
 		{
 			description: "set existing field bool",
-			path:        []string{"abc"},
+			path:        testPath("abc"),
 			arg:         true,
 			expected:    `{ "abc": true }`,
 		},
@@ -27,37 +28,43 @@ func TestSetOperation(t *testing.T) {
 		// by default
 		{
 			description: "set existing field number",
-			path:        []string{"abc"},
+			path:        testPath("abc"),
 			arg:         1234.0,
 			expected:    `{ "abc": 1234.0 }`,
 		},
 		{
 			description: "set existing field string",
-			path:        []string{"abc"},
+			path:        testPath("abc"),
 			arg:         "test",
 			expected:    `{ "abc": "test" }`,
 		},
 		{
 			description: "set existing field null",
-			path:        []string{"abc"},
+			path:        testPath("abc"),
 			arg:         nil,
 			expected:    `{ "abc": null }`,
 		},
 		{
 			description: "set existing field json",
-			path:        []string{"abc"},
+			path:        testPath("abc"),
 			arg:         map[string]any{"one": "two"},
 			expected:    `{ "abc": { "one": "two" } }`,
 		},
 		{
+			description: "set array field",
+			path:        testPath("abc", "def", 0),
+			arg:         "new val",
+			expected:    `{ "abc": { "def": [ "new val", 2, 3 ] } }`,
+		},
+		{
 			description: "set new field",
-			path:        []string{"new field"},
+			path:        testPath("new field"),
 			arg:         true,
 			expected:    `{ "abc": { "def": [ 1, 2, 3 ] }, "new field": true }`,
 		},
 		{
 			description: "set array field",
-			path:        []string{"abc", "def", "0"},
+			path:        testPath("abc", "def", "0"),
 			arg:         true,
 			expected:    `{ "abc": { "def": [ true, 2, 3 ] } }`,
 		},
@@ -71,6 +78,8 @@ func TestSetOperation(t *testing.T) {
 		if ex.isErr {
 			assert.Error(t, err, "[Ex %d - %s]", idx+1, ex.description)
 			continue
+		} else {
+			assert.NoError(t, err, "[Ex %d - %s]", idx+1, ex.description)
 		}
 
 		expected := simplejson.MustParse([]byte(ex.expected))

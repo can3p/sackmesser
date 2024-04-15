@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Merge(root types.Node, path []string, args ...any) error {
+func Merge(root types.Node, path []types.PathElement, args ...any) error {
 	if len(args) != 1 {
 		return errors.Errorf("set operation expects one argument")
 	}
