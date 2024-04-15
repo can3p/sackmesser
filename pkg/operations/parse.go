@@ -34,6 +34,7 @@ var operations = map[string]Operation{
 	"set":   Set,
 	"del":   Delete,
 	"merge": Merge,
+	"pop":   Pop,
 }
 
 //nolint:govet
