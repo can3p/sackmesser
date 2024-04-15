@@ -5,9 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func traverseButOne(root types.Node, path []string) (types.Node, string, error) {
+func traverseButOne(root types.Node, path []types.PathElement) (types.Node, types.PathElement, error) {
 	if len(path) < 1 {
-		return root, "", errors.Errorf("cannot traverse nodes with zero length path")
+		return root, types.PathElement{}, errors.Errorf("cannot traverse nodes with zero length path")
 	}
 
 	if len(path) == 1 {
@@ -21,7 +21,7 @@ func traverseButOne(root types.Node, path []string) (types.Node, string, error) 
 		root, err = root.Visit(path[idx])
 
 		if err != nil {
-			return nil, "", err
+			return nil, types.PathElement{}, err
 		}
 	}
 

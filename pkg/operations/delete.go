@@ -4,7 +4,7 @@ import (
 	"github.com/can3p/sackmesser/pkg/traverse/types"
 )
 
-func Delete(root types.Node, path []string, args ...any) error {
+func Delete(root types.Node, path []types.PathElement, args ...any) error {
 	node, lastChunk, err := traverseButOne(root, path)
 
 	if err == types.ErrFieldMissing {

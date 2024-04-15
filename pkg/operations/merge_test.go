@@ -5,6 +5,7 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/can3p/sackmesser/pkg/traverse/simplejson"
+	"github.com/can3p/sackmesser/pkg/traverse/types"
 )
 
 func TestMergeOperation(t *testing.T) {
@@ -12,7 +13,7 @@ func TestMergeOperation(t *testing.T) {
 
 	examples := []struct {
 		description string
-		path        []string
+		path        []types.PathElement
 		arg         any
 		initial     string
 		expected    string
@@ -20,28 +21,28 @@ func TestMergeOperation(t *testing.T) {
 	}{
 		{
 			description: "add new field to the object",
-			path:        []string{"abc", "def"},
+			path:        testPath("abc", "def"),
 			arg:         map[string]any{"added": true},
 			initial:     jstr,
 			expected:    `{ "abc": { "def": { "cfa": [ 1, 2, 3 ], "added": true } } }`,
 		},
 		{
 			description: "scalar value should produce an error",
-			path:        []string{"abc", "def"},
+			path:        testPath("abc", "def"),
 			arg:         true,
 			initial:     jstr,
 			isErr:       true,
 		},
 		{
 			description: "non existant field is just set",
-			path:        []string{"abc", "new field"},
+			path:        testPath("abc", "new field"),
 			arg:         map[string]any{"added": true},
 			initial:     jstr,
 			expected:    `{ "abc": { "def": { "cfa": [ 1, 2, 3 ] },  "new field": { "added": true } } }`,
 		},
 		{
 			description: "non object target field means set",
-			path:        []string{"abc", "def"},
+			path:        testPath("abc", "def"),
 			arg:         map[string]any{"added": true},
 			initial:     `{ "abc": { "def": true } }`,
 			expected:    `{ "abc": { "def": { "added": true } } }`,
