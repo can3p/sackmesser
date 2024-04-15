@@ -70,7 +70,7 @@ prop:
 ### Set a field with a value
 
 ```
-$ echo '{ "a":1 }' | sackmesser mod 'set(prop, `{ "test": 123 }`'
+$ echo '{ "a":1 }' | sackmesser mod 'set(prop, `{ "test": 123 })`'
 {
   "a": 1,
   "prop": "{ \"test\": 123 }"
@@ -98,7 +98,7 @@ $ echo '{ "a":1 }' | sackmesser mod "set(prop, `value`)"
 ### Set a field with a value that will be parsed as a JSON first
 
 ```
-$ echo '{ "a":1 }' | sackmesser mod 'set(prop, { "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod 'set(prop, { "test": 123 })'
 {
     "a": 1,
     "prop": {
@@ -110,7 +110,7 @@ $ echo '{ "a":1 }' | sackmesser mod 'set(prop, { "test": 123 }'
 You can always spit out a different format if you want!
 
 ```
-$ echo '{ "a":1 }' | sackmesser mod --output-format yaml 'set(prop, { "test": 123 }'
+$ echo '{ "a":1 }' | sackmesser mod --output-format yaml 'set(prop, { "test": 123 })'
 {
 a: 1
 prop:
