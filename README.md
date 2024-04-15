@@ -16,7 +16,7 @@ Or worse, where you had to count spaces in yaml? Fear no more, sackmesser will t
 
 Operations have a signature like `op_name(path, args*)` where
 
-* path is dot delimited, you could use quotes in case field names contain spaces, dots, commas, etc:
+* path is dot delimited, you could use quotes in case field names contain spaces, dots, commas, etc. For array access you can use array notation:
 
   ```
   echo '{ "a" : { "test prop": 1 } }' | sackmesser mod 'set(a."test prop", "test")'
@@ -24,6 +24,16 @@ Operations have a signature like `op_name(path, args*)` where
     "a": {
       "test prop": "test"
     }
+  }
+  ```
+
+  ```
+  echo '{ "a" : { "test prop": [ 1 , true ] } }' | sackmesser mod 'set(a."test prop"[1], "test")'
+  "a": {
+    "test prop": [
+      1,
+      "test"
+    ]
   }
   ```
 
